@@ -1,9 +1,8 @@
 import os
 from flask import Flask, flash, request, redirect, url_for, render_template
 from werkzeug.utils import secure_filename
-from flask import send_from_directory
 from tensorflow.keras.models import load_model 
-import os
+import socket
 import numpy as np
 import pickle
 from PIL import Image
@@ -19,9 +18,9 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-with open("C:/Users/USER/Desktop/Desktop/Projects/model api/models/class_names", "rb") as fp:   # Unpickling
+with open("models/class_names", "rb") as fp:   # Unpickling
     class_names = pickle.load(fp)
-
+hostname = socket.gethostname()
 # Route that will process the file upload
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
@@ -39,7 +38,7 @@ def upload_file():
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))#save the file in the uploads folder
-            model = load_model('C:/Users/USER/Desktop/Desktop/Projects/model api/models/model1.h5')#load the model
+            model = load_model('models/model1.h5')#load the model
             
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             
@@ -59,7 +58,7 @@ def upload_file():
             
             
 
-            return render_template('upload.html', filename=filename, output = output)#passes the filename in the upload.html file and then renders it, cont in the upload.html file
+            return render_template('upload.html', filename=filename, output = output, hostname = hostname)#passes the filename in the upload.html file and then renders it, cont in the upload.html file
         else:
             flash("File not allowed. Please upload a .jpg file.")
             return redirect(request.url)
@@ -74,4 +73,4 @@ def home():
     return render_template('home.html')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000)

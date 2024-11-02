@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: detector-deployment
+  labels:
+    name: detector-deployment
+    app: leaf-disease-detector-app
+spec: 
+  replicas: 3
+  selector: 
+    matchLabels:
+      name: detector-pod
+      app: leaf-disease-detector-app
+  template:
+    metadata:
+      name: detector-pod
+      labels:
+        name: detector-pod
+        app: leaf-disease-detector-app
+    spec:
+      containers:
+        - name: leaf-disease-detector
+          image: model-api
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 5000
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: detector-service
+  labels:
+    name: detector-service
+    app: leaf-disease-detector-app
+spec: 
+  type: NodePort
+  ports:
+    - port: 5000
+      targetPort: 5000
+      nodePort: 30004
+  selector:
+    name: detector-pod
+    app: leaf-disease-detector-app
